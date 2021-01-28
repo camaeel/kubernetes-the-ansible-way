@@ -10,6 +10,11 @@ variable "aws_zones" {
   description = "AWS availability zones"
   default     = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 }
+variable "additional_tags" {
+  default     = {"project": "kubernetes-the-ansible-way"}
+  description = "Additional resource tags"
+  type        = map(string)
+}
 
 variable "controlplane_nodes_number" {
   type = number
@@ -34,4 +39,17 @@ variable "worker_node_size" {
   type = string
   description = "K8s worker node size"
   default     = "t2.micro"
+}
+
+# networks
+variable "vpc_cidr" {
+  type = string
+  description = "CIDR for nodes vpc"
+  default = "10.10.0.0/16"
+}
+
+variable "subnet_mask_length" {
+  type = number
+  default = 24
+  description = "VPC subnet bit mask"
 }
