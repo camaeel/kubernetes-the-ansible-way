@@ -1,3 +1,22 @@
+# Backend variables
+variable "backend_bucket_name" {
+  type = string
+  description = "TF state S3 bucket name"
+}
+
+variable "backend_bucket_key" {
+  type = string
+  description = "TF state path in S3 bucket"
+  default     = "kubernetes-the-ansible-way"
+}
+
+variable "backend_aws_region" {
+  type = string
+  description = "AWS S3 backend region"
+  default     = "eu-central-1"
+}
+
+# Infra related variables
 variable "aws_region" {
   type = string
   description = "AWS region"
@@ -5,7 +24,7 @@ variable "aws_region" {
 }
 
 variable "aws_zones" {
-  type = string
+  type = list(string)
   description = "AWS availability zones"
   default     = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 }
