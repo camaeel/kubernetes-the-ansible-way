@@ -123,7 +123,7 @@ resource "aws_default_network_acl" "default-nacl" {
     to_port    = 0
   }
 
-    tags = merge(
+  tags = merge(
     var.additional_tags,
     {
       Name = "default-nacl"

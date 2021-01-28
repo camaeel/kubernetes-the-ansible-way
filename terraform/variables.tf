@@ -53,3 +53,20 @@ variable "subnet_mask_length" {
   default = 24
   description = "VPC subnet bit mask"
 }
+
+variable "node_ami_name" {
+  type = string
+  default = "ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"
+  description = "Node AMI name"
+}
+
+variable "node_ami_owner" {
+  type = string
+  default = "099720109477"
+  description = "Node AMI owner"
+}
+
+variable "public_key" {
+  type = string
+  description = "public key used to access EC2 instances"
+}
