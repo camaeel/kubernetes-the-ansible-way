@@ -20,7 +20,7 @@ Before you start you should provide some configuration
 The first step is to prepare infrastructure for the Kubernetes cluster. I chose AWS as a cloud provider. Infrastructure can be easily created by using included terraform project (in `terraform` directory)
 
 ## Configure infrastructure
-Infrastructure can be customized by defining variables (from in `terraform/variables.tf`) in `terraform/*.tfvars` files. For example you can override number of controlplane instances
+Infrastructure can be customized by defining variables (from in `terraform/variables.tf`) in `terraform/*.tfvars` files. For example you can override number of controlplane instances. As a default backend I'm using S3. You can configure your bakend by creating `terraform/backend.tf` file (from provided template: `terraform/backend.tf.template`) or with terraform parameters according to https://www.terraform.io/docs/language/settings/backends/configuration.html. 
 
 
 # Cleanup
