@@ -121,6 +121,8 @@ resource "aws_default_network_acl" "default-nacl" {
     cidr_block = "0.0.0.0/0"
     from_port  = 0
     to_port    = 0
+    icmp_type  = -1
+    icmp_code  = -1
   }
 
   egress {
