@@ -1,0 +1,60 @@
+---
+- name: "add source keys"
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  loop: "{{ sources_keys }}"
+  when: sources_keys is defined
+
+- name: "Add source repositories"
+  apt_repository:
+    repo: "{{item}}"
+    state: present
+  with_items: "{{ sources_repos }}"
+  when: sources_repos is defined
+
+- name: "update packages"
+  apt:
+    update_cache: yes
+  tags:
+  - update
+
+- name: "upgrade packages"
+  apt:
+    upgrade: full
+    update_cache: yes
+    cache_valid_time: 3600
+  tags:
+  - update
+
+- name: "Install packages: {{add_packages_list}}"
+  apt:
+    pkg: "{{ add_packages_list }}"
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+  when: add_packages_list is defined
+
+- name: "Remove packages: {{ remove_packages_list }}"
+  apt:
+    pkg: "{{ remove_packages_list }}"
+    state: absent
+    purge: yes
+  when: remove_packages_list is defined
+
+- name: "Clean obsolete packages"
+  apt:
+    autoremove: yes
+    purge: yes
+  tags:
+  - update
+
+- name: "Clean package cache"
+  apt:
+     autoclean: yes
+  tags:
+  - update
+
+# master: kubeadn init --pod-network-cidr=10.100.0.0/16
+# instalacja calico: https://docs.projectcalico.org/getting-started/kubernetes/quickstart
+# workery: kubeadm join...

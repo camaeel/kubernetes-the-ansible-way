@@ -1,0 +1,77 @@
+# set known hosts
+- hosts: all
+  gather_facts: False
+  vars:
+    ansible_become: False
+  tasks:
+  - name: Wait for port 22 to become open on the host
+    local_action:
+      module: wait_for
+      port: 22
+
+  - name: Usun klucz z known_hosts
+    delegate_to: localhost
+    known_hosts:
+      name: "{{ ansible_host }}"
+      state: absent
+
+  - name: Dodaj klucz do known_hosts
+    local_action:
+      module: known_hosts
+      name: "{{ ansible_host }}"
+      key: "{{ lookup('pipe', 'ssh-keyscan -tecdsa -p 22 ' + ansible_host  | quote ) }}"
+      state: present
+      hash_host: yes
+
+# update system + install packages
+- hosts: aws_ec2
+  become: True
+
+  pre_tasks:
+  - name: Set timezone to Europe/Warsaw
+    timezone:
+      name: Europe/Warsaw
+
+  - name: set hostname
+    hostname:
+      name: "{{ inventory_hostname }}"
+
+  # - name: Set /etc/hosts
+  #   lineinfile:
+  #     dest: /etc/hosts
+  #     line: '{{ hostvars[item]["ansible_default_ipv4"]["address"] }} {{ hostvars[item]["ansible_hostname"] }} {{ hostvars[item]["ansible_nodename"] }}'
+  #     state: present
+  #   loop: "{{ groups['all'] }}"
+
+  roles:
+  - role: install_packages
+    tags:
+    - install_packages
+    add_packages_list:
+    - unattended-upgrades
+    - curl
+    - iptables
+    - netfilter-persistent
+    - mc
+    - vim
+    - aptitude
+    - net-tools
+    - nmon
+    - iotop
+    - htop
+    - apt-transport-https
+    - ca-certificates
+    remove_packages_list:
+    - snapd
+    - gnome-software-plugin-snap
+    # sources_keys:
+    # - https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    # - https://download.docker.com/linux/ubuntu/gpg
+    # sources_repos:
+    # - 'deb https://apt.kubernetes.io/ kubernetes-xenial main'
+    # - "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+  
+  # kubernetes doesn't like swap
+  - role: disable_swap
+    tags: disable_swap
+

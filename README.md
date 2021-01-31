@@ -40,7 +40,10 @@ Install requirements:
 1. Provide AWS credentials
 
 ## Prepare EC2 instances
-TODO
+This step updates VMs OS, installs required packages, disables swap. 
+TODO...
+
+Run `ansible-playbook -i inventory.aws_ec2.yml 1_prepare_vms.yml`
 
 ## Install controlplane and worker nodes
 
