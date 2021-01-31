@@ -114,6 +114,15 @@ resource "aws_default_network_acl" "default-nacl" {
     to_port    = 6443
   }
 
+  ingress {
+    protocol   = "icmp"
+    rule_no    = 700
+    action     = "allow"
+    cidr_block = "0.0.0.0/0"
+    from_port  = 0
+    to_port    = 0
+  }
+
   egress {
     protocol   = -1
     rule_no    = 100

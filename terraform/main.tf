@@ -56,6 +56,10 @@ resource "aws_instance" "controlplane" {
   instance_type = var.controlplane_node_size
   count         = var.controlplane_nodes_number
   subnet_id = element(module.network.public_subnets, count.index).id
+  security_groups = [ 
+    aws_security_group.k8s-node-sg.id, 
+    aws_security_group.k8s-controlplane-node-sg.id
+  ]
 
   key_name = local.ssh_key_name
 
@@ -73,6 +77,9 @@ resource "aws_instance" "worker" {
   instance_type = var.worker_node_size
   count         = var.worker_nodes_number
   subnet_id = element(module.network.public_subnets, count.index).id
+  security_groups = [ 
+    aws_security_group.k8s-node-sg.id 
+  ]
 
   key_name = local.ssh_key_name
 
@@ -86,3 +93,70 @@ resource "aws_instance" "worker" {
 }
 
 # TODO: security groups
+
+resource "aws_security_group" "k8s-node-sg" {
+  name        = "k8s-node-sg"
+  description = "Allow access to generic k8s node"
+  vpc_id      = module.network.vpc.id
+
+  ingress {
+    description = "SSH from internet"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "ICMP from internet"
+    protocol    = "icmp"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "Any traffic from the same SG"
+    from_port   = 0
+    to_port     = 0    
+    protocol    = "-1"
+    self        = true
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(
+    var.additional_tags,
+    {
+      Name = "k8s-node-sg"
+    },
+  )
+}
+
+resource "aws_security_group" "k8s-controlplane-node-sg" {
+  name        = "k8s-controlplane-node-sg"
+  description = "Allow access to controlplane k8s node"
+  vpc_id      = module.network.vpc.id
+
+  ingress {
+    description = "kube-apiserver"
+    from_port   = 6443
+    to_port     = 6443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(
+    var.additional_tags,
+    {
+      Name = "k8s-controlplane-node-sg"
+    },
+  )
+}
+
+
