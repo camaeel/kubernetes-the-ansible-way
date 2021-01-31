@@ -1,0 +1,2 @@
+#set remote users to ubuntu's default
+ansible_user: "ubuntu"

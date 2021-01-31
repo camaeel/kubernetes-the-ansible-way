@@ -1,0 +1,19 @@
+plugin: aws_ec2
+
+# set hostname to tag:Name
+hostnames: tag:Name
+
+compose:
+  # Set public ip as ansible_host variable
+  ansible_host: public_ip_address
+
+# filter out only this project's infrastructure
+filters:
+  tag:project: kubernetes-the-ansible-way
+
+# group nodes
+keyed_groups:
+  # by tag set in the aws from terraform
+  - separator: ''
+    key: tags['ansible-group']
+
