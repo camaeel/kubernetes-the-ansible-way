@@ -11,6 +11,26 @@ provider "aws" {
   region = var.aws_region
 }
 
+resource "aws_resourcegroups_group" "kubernetes-the-ansible-way" {
+  name = "kubernetes-the-ansible-way"
+
+  resource_query {
+    query = <<JSON
+{
+  "ResourceTypeFilters": [
+    "AWS::AllSupported"
+  ],
+  "TagFilters": [
+    {
+      "Key": "project",
+      "Values": ["kubernetes-the-ansible-way"]
+    }
+  ]
+}
+JSON
+  }
+}
+
 module "network" {
   source        = "./network"
   vpc_cidr        = var.vpc_cidr
@@ -67,7 +87,7 @@ resource "aws_instance" "controlplane" {
     var.additional_tags,
     {
       Name = "controlplane-${count.index}"
-      Role = "controlplane"
+      ansible-group = "controlplane"
     },
   )
 }
@@ -87,7 +107,7 @@ resource "aws_instance" "worker" {
     var.additional_tags,
     {
       Name = "worker-${count.index}"
-      Role = "worker"
+      ansible-group = "workers"
     },
   )
 }
