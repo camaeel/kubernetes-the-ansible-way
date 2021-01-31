@@ -76,7 +76,7 @@ resource "aws_instance" "controlplane" {
   instance_type = var.controlplane_node_size
   count         = var.controlplane_nodes_number
   subnet_id = element(module.network.public_subnets, count.index).id
-  security_groups = [ 
+  vpc_security_group_ids = [ 
     aws_security_group.k8s-node-sg.id, 
     aws_security_group.k8s-controlplane-node-sg.id
   ]
@@ -97,7 +97,7 @@ resource "aws_instance" "worker" {
   instance_type = var.worker_node_size
   count         = var.worker_nodes_number
   subnet_id = element(module.network.public_subnets, count.index).id
-  security_groups = [ 
+  vpc_security_group_ids = [ 
     aws_security_group.k8s-node-sg.id 
   ]
 
