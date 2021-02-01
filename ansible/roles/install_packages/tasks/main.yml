@@ -12,16 +12,20 @@
     state: present
   with_items: "{{ sources_repos }}"
   when: sources_repos is defined
+  register: add_source_repos
 
-- name: "update packages"
+- name: "update packages (if repos added)"
   apt:
     update_cache: yes
+  when: add_source_repos.changed == true
   tags:
   - update
 
-- name: "upgrade packages"
+- name: "upgrade packages (with update)"
   apt:
-    upgrade: full
+    upgrade: dist
+    autoclean: yes
+    autoremove: yes
     update_cache: yes
     cache_valid_time: 3600
   tags:
