@@ -56,6 +56,7 @@
 - name: "Clean package cache"
   apt:
      autoclean: yes
+  when: clean_packages_cache is defined and clean_packages_cache == True
   tags:
   - update
 
