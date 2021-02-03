@@ -53,6 +53,7 @@
     - iptables
     - netfilter-persistent
     - mc
+    - netcat
     - vim
     - aptitude
     - net-tools

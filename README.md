@@ -1,7 +1,7 @@
 # Intro
 Install kubernetes "the hard way" using ansible playbooks. 
 
-Project was inspired on [Kelsey Hightower's: Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) repository.
+Project was inspired on [Kelsey Hightower's: Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) and [Mumshad Mannambeth's: Kubernetes the hard way](https://github.com/mmumshad/kubernetes-the-hard-way) repositories.
 
 It was created only for educational purposes and it should **NOT** be considered as production ready.
 
@@ -36,8 +36,9 @@ This project uses ansible configuration in `ansible` directory to configure virt
 ## Initial setup
 Install requirements:
 1. Install ansbible
+1. Install kubectl v1.20+
 1. Install python libraries: boto3, botocore
-1. Provide AWS credentials
+1. Provide AWS credentials to ansible
 
 ## Prepare EC2 instances
 This step updates VMs OS, installs required packages, disables swap. 

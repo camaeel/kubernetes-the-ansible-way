@@ -1,0 +1,8 @@
+---
+- hosts: controlplane[0]
+  become: true
+  roles:
+  - name: create_pki
+    tags: create_pki
+
+    

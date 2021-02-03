@@ -1,0 +1,56 @@
+### root ca
+- name: create dir for PKI
+  file:
+    state: directory
+    path: "{{ pki_directory }}"
+    mode: 0700
+
+- name: Generate CA key
+  openssl_privatekey:
+    path: "{{ pki_directory }}/ca.key"
+
+- name: create root ca csr
+  openssl_csr:
+    path: "{{ pki_directory }}/ca.csr"
+    privatekey_path: "{{ pki_directory }}/ca.key"
+    common_name: KUBERNETES-CA
+    key_usage:
+    - digitalSignature
+    - nonRepudiation
+    - keyEncipherment
+    - dataEncipherment
+    - keyCertSign
+    - cRLSign
+
+- name: create root ca certificates
+  openssl_certificate:
+    path: "{{ pki_directory }}/ca.crt"
+    privatekey_path: "{{ pki_directory }}/ca.key"
+    csr_path: "{{ pki_directory }}/ca.csr"
+    provider: selfsigned
+
+#### admin user
+
+- name: Generate admin key
+  openssl_privatekey:
+    path: "{{ pki_directory }}/admin.key"
+
+- name: create admin csr
+  openssl_csr:
+    path: "{{ pki_directory }}/admin.csr"
+    privatekey_path: "{{ pki_directory }}/admin.key"
+    common_name: admin
+    organization_name: "system:masters"
+    key_usage: []
+    extended_key_usage:
+    - clientAuth
+
+- name: create admin certificates
+  openssl_certificate:
+    path: "{{ pki_directory }}/admin.crt"
+    csr_path: "{{ pki_directory }}/admin.csr"
+    ownca_path: "{{ pki_directory }}/ca.crt"
+    ownca_privatekey_path: "{{ pki_directory }}/ca.key"
+    provider: ownca
+
+
