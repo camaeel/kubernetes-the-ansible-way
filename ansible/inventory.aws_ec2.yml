@@ -17,3 +17,7 @@ keyed_groups:
   - separator: ''
     key: tags['ansible-group']
 
+
+#narrowing only to selected regions greatly optimizes inventory read time
+regions:
+- eu-central-1
