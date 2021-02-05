@@ -1,7 +1,7 @@
 # Intro
 Install kubernetes "the hard way" using ansible playbooks. 
 
-Project was inspired on [Kelsey Hightower's: Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) and [Mumshad Mannambeth's: Kubernetes the hard way](https://github.com/mmumshad/kubernetes-the-hard-way) repositories.
+Project was inspired by [Kelsey Hightower's: Kubernetes the hard way](https://github.com/kelseyhightower/kubernetes-the-hard-way) and [Mumshad Mannambeth's: Kubernetes the hard way](https://github.com/mmumshad/kubernetes-the-hard-way) repositories.
 
 It was created only for educational purposes and it should **NOT** be considered as production ready.
 

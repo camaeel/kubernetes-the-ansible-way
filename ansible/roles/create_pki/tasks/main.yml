@@ -83,3 +83,23 @@
       - IP:10.96.0.1
       - "{{ groups['controlplane'] | map('extract', hostvars, ['public_ip_address']) | map('regex_replace', '^', 'IP:') | list  }}"
       - "{{ groups['controlplane'] | map('extract', hostvars, ['private_ip_address']) | map('regex_replace', '^', 'IP:') | list  }}"
+
+- name: generate etcd-server key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: etcd-server
+      # cn: etcd-server
+      key_usage: 
+      - nonRepudiation
+      - digitalSignature
+      - keyEncipherment
+      subject_alt_name_list:
+      - IP:127.0.0.1
+      - "{{ groups['controlplane'] | map('extract', hostvars, ['private_ip_address']) | map('regex_replace', '^', 'IP:') | list  }}"
+
+- name: generate service-account key + crt (used for signing serviceaccount keys)
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: service-account
