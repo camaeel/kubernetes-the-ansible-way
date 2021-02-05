@@ -1,0 +1,22 @@
+---
+- name: "Generate {{ entity.name }} key"
+  openssl_privatekey:
+    path: "{{ pki_directory }}/{{ entity.name }}.key"
+
+- name: "create {{ entity.name }} csr"
+  openssl_csr:
+    path: "{{ pki_directory }}/{{ entity.name }}.csr"
+    privatekey_path: "{{ pki_directory }}/{{ entity.name }}.key"
+    common_name: "{{ entity.cn | default(entity.name) }}"
+    organization_name: "{{ entity.on | default('') }}"
+    key_usage: "{{ entity.key_usage | default([]) }}"
+    extended_key_usage: "{{ entity.extended_key_usage | default([]) }}"
+    subject_alt_name: "{{ entity.subject_alt_name_list | default([]) | flatten }}"
+
+- name: "create {{ entity.name }} certificates"
+  openssl_certificate:
+    path: "{{ pki_directory }}/{{ entity.name }}.crt"
+    csr_path: "{{ pki_directory }}/{{ entity.name }}.csr"
+    ownca_path: "{{ pki_directory }}/ca.crt"
+    ownca_privatekey_path: "{{ pki_directory }}/ca.key"
+    provider: ownca

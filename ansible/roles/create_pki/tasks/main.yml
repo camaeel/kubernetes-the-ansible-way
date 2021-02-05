@@ -30,27 +30,56 @@
     provider: selfsigned
 
 #### admin user
+- name: generate admin key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: admin
+      on: system:masters
+      extended_key_usage: 
+      - clientAuth
 
-- name: Generate admin key
-  openssl_privatekey:
-    path: "{{ pki_directory }}/admin.key"
+#### kube-controller-manager client cert
 
-- name: create admin csr
-  openssl_csr:
-    path: "{{ pki_directory }}/admin.csr"
-    privatekey_path: "{{ pki_directory }}/admin.key"
-    common_name: admin
-    organization_name: "system:masters"
-    key_usage: []
-    extended_key_usage:
-    - clientAuth
+- name: generate kube-controller-manager key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: kube-controller-manager
+      cn: system:kube-controller-manager
 
-- name: create admin certificates
-  openssl_certificate:
-    path: "{{ pki_directory }}/admin.crt"
-    csr_path: "{{ pki_directory }}/admin.csr"
-    ownca_path: "{{ pki_directory }}/ca.crt"
-    ownca_privatekey_path: "{{ pki_directory }}/ca.key"
-    provider: ownca
+#### kube-proxy client cert
 
+- name: generate kube-proxy key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: kube-proxy
+      cn: system:kube-proxy
 
+- name: generate kube-scheduler key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: kube-scheduler
+      cn: system:kube-scheduler
+
+- name: generate kube-apiserver key + crt
+  include_tasks: create_certificate.yml
+  vars:
+    entity:
+      name: kube-apiserver
+      # cn: kube-apiserver
+      key_usage: 
+      - nonRepudiation
+      - digitalSignature
+      - keyEncipherment
+      subject_alt_name_list:
+      - DNS:kubernetes
+      - DNS:kubernetes.default
+      - DNS:kubernetes.default.svc
+      - DNS:kubernetes.default.svc.cluster.local
+      - IP:127.0.0.1
+      - IP:10.96.0.1
+      - "{{ groups['controlplane'] | map('extract', hostvars, ['public_ip_address']) | map('regex_replace', '^', 'IP:') | list  }}"
+      - "{{ groups['controlplane'] | map('extract', hostvars, ['private_ip_address']) | map('regex_replace', '^', 'IP:') | list  }}"
