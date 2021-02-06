@@ -1,8 +1,53 @@
 ---
+# generate keys and certs
 - hosts: controlplane[0]
   become: true
   roles:
   - name: create_pki
     tags: create_pki
 
-    
+  post_tasks:
+  # this steps requires pki secret files to be moved from servers to your local machine. It is simplification for learning purposes. 
+  # On production you should consider more secure ways to distribute keys.
+  - name: fetch pki files
+    fetch: 
+      src: "{{ pki_directory }}/{{ item }}"
+      flat: yes
+      dest: pki/
+    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
+    tags: test
+
+  - name: change access rights
+    become: false
+    local_action:
+      module: file
+      path: "pki/{{ item }}"
+      mode: 0600
+    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
+    tags: test
+
+- hosts: controlplane:!controlplane[0]
+  become: true
+  tasks: 
+  - name: copy pki to remote host
+    copy:
+      dest: "{{ pki_directory }}/"
+      owner: root
+      group: root
+      src: "pki/{{ item }}"
+      mode: 0600
+    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
+    tags: test
+
+- hosts: workers
+  become: true
+  tasks: 
+  - name: copy pki to remote host
+    copy:
+      dest: "{{ pki_directory }}/"
+      owner: root
+      group: root
+      src: "pki/{{ item }}"
+      mode: 0600
+    loop: "{{ ['ca'] | product(['crt', 'key']) | map('join', '.') | list }}"
+    tags: test
