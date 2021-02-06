@@ -42,11 +42,17 @@ Install requirements:
 
 ## Prepare EC2 instances
 This step updates VMs OS, installs required packages, disables swap. 
-TODO...
 
 Run `ansible-playbook -i inventory.aws_ec2.yml 1_prepare_vms.yml`
 
+## Prepare loadbalancer
+This step provisions simple nginx TCP loadbalancer on dedicated host. It could be replaced by cloud providers native solution. 
+
+Run: `ansible-playbook -i inventory.aws_ec2.yml 2_prepare_lb.yml`
+
 ## Install controlplane and worker nodes
+
+Run: `ansible-playbook -i inventory.aws_ec2.yml 3_install_k8s.yml`
 
 # Cleanup
 The easiest way to cleanup the project is to use terraform to destroy de infrastructure. In `terraform` directory run `terraform destroy`

@@ -9,6 +9,7 @@
   post_tasks:
   # this steps requires pki secret files to be moved from servers to your local machine. It is simplification for learning purposes. 
   # On production you should consider more secure ways to distribute keys.
+  # TODO: Replace with more secure solution
   - name: fetch pki files
     fetch: 
       src: "{{ pki_directory }}/{{ item }}"

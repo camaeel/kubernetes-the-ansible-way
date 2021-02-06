@@ -17,3 +17,13 @@ output "worker-nodes-private-ip" {
 output "worker-nodes-public-ip" {
   value = aws_instance.worker.*.public_ip
 }
+
+output "loadbalancer-nodes-name" {
+  value = aws_instance.loadbalancer.tags.Name
+}
+output "loadbalancer-nodes-private-ip" {
+  value = aws_instance.loadbalancer.private_ip
+}
+output "loadbalancer-nodes-public-ip" {
+  value = aws_instance.loadbalancer.public_ip
+}

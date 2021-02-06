@@ -16,6 +16,12 @@ variable "additional_tags" {
   type        = map(string)
 }
 
+variable "loadbalancer_node_size" {
+  type = string
+  description = "K8s loadbalancer node size"
+  default     = "t2.micro"
+}
+
 variable "controlplane_nodes_number" {
   type = number
   description = "K8s controlplane nodes number. It should always be odd number"

@@ -1,0 +1,23 @@
+---
+- hosts: loadbalancers
+  become: true
+  roles:
+  - role: install_packages
+    tags:
+    - install_packages
+    add_packages_list:
+    - nginx
+
+  tasks:
+  - name: configure nginx
+    template:
+      src: nginx.j2.conf
+      dest: /etc/nginx/nginx.conf
+    notify: restart nginx
+
+
+  handlers:
+  - name: restart nginx
+    service:
+      name: nginx
+      state: restarted

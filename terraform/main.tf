@@ -160,7 +160,28 @@ resource "aws_security_group" "k8s-node-sg" {
 
 resource "aws_security_group" "k8s-controlplane-node-sg" {
   name        = "k8s-controlplane-node-sg"
-  description = "Allow access to controlplane k8s node"
+  description = "Allow access to controlplane k8s node from loadbalancer host"
+  vpc_id      = module.network.vpc.id
+
+  ingress {
+    description = "kube-apiserver"
+    from_port   = 6443
+    to_port     = 6443
+    protocol    = "tcp"
+    security_groups = [aws_security_group.load-balancer-sg.id]
+  }
+
+  tags = merge(
+    var.additional_tags,
+    {
+      Name = "k8s-controlplane-node-sg"
+    },
+  )
+}
+
+resource "aws_security_group" "load-balancer-sg" {
+  name        = "load-balancer-sg"
+  description = "Allow access to loadbalancer from internet"
   vpc_id      = module.network.vpc.id
 
   ingress {
@@ -174,9 +195,29 @@ resource "aws_security_group" "k8s-controlplane-node-sg" {
   tags = merge(
     var.additional_tags,
     {
-      Name = "k8s-controlplane-node-sg"
+      Name = "load-balancer-sg"
     },
   )
 }
 
+# simple load balancer host
 
+resource "aws_instance" "loadbalancer" {
+  ami           = data.aws_ami.ubuntu.id
+  instance_type = var.loadbalancer_node_size
+  subnet_id = module.network.public_subnets[0].id
+  vpc_security_group_ids = [ 
+    aws_security_group.k8s-node-sg.id, 
+    aws_security_group.load-balancer-sg.id
+  ]
+
+  key_name = local.ssh_key_name
+
+  tags = merge(
+    var.additional_tags,
+    {
+      Name = "loadbalancer"
+      ansible-group = "loadbalancers"
+    },
+  )
+}
