@@ -101,5 +101,5 @@
   roles:
   - name: secret_encryption
     tags: secret_encryption
-
-
+  - name: install_etcd
+    tags: install_etcd

@@ -1,3 +1,4 @@
 #set remote users to ubuntu's default
 ansible_user: "ubuntu"
 kubernetes_configs_dir: /etc/k8s
+etcd_version: v3.4.14
