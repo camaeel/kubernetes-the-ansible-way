@@ -1,31 +1,50 @@
 ---
 # generate keys and certs
-- hosts: controlplane[0]
-  become: true
+- hosts: localhost
+  become: false
   roles:
   - name: create_pki
     tags: create_pki
+    vars:
+      pki_directory: "{{ playbook_dir }}/pki/"
+  - name: generate_kubeconfig
+    tags: generate_kubeconfig
+    vars: 
+      entity:
+        kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
+        server: "{{ hostvars['loadbalancer'].public_ip_address }}"
+        user: admin
+        cred_filename: admin
+        default: False
+  - name: generate_kubeconfig
+    tags: generate_kubeconfig
+    vars: 
+      entity:
+        kubeconfig_path: "{{ pki_directory }}/kube-proxy.kubeconfig"
+        server: "{{ hostvars['loadbalancer'].private_ip_address }}"
+        user: system:kube-proxy
+        cred_filename: kube-proxy
+        default: True
+  - name: generate_kubeconfig
+    tags: generate_kubeconfig
+    vars: 
+      entity:
+        kubeconfig_path: "{{ pki_directory }}/kube-controller-manager.kubeconfig"
+        server: "{{ hostvars['loadbalancer'].private_ip_address }}"
+        user: system:kube-controller-manager
+        cred_filename: kube-controller-manager
+        default: True
+  - name: generate_kubeconfig
+    tags: generate_kubeconfig
+    vars: 
+      entity:
+        kubeconfig_path: "{{ pki_directory }}/kube-scheduler.kubeconfig"
+        server: "{{ hostvars['loadbalancer'].private_ip_address }}"
+        user: system:kube-scheduler
+        cred_filename: kube-scheduler 
+        default: True            
 
-  post_tasks:
-  # this steps requires pki secret files to be moved from servers to your local machine. It is simplification for learning purposes. 
-  # On production you should consider more secure ways to distribute keys.
-  # TODO: Replace with more secure solution
-  - name: fetch pki files
-    fetch: 
-      src: "{{ pki_directory }}/{{ item }}"
-      flat: yes
-      dest: pki/
-    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server', 'admin'] | product(['crt', 'key']) | map('join', '.') | list }}"
-
-  - name: change access rights
-    become: false
-    local_action:
-      module: file
-      path: "pki/{{ item }}"
-      mode: 0600
-    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
-
-- hosts: controlplane:!controlplane[0]
+- hosts: controlplane
   become: true
   tasks: 
   - name: copy pki to remote host
@@ -36,31 +55,46 @@
       src: "pki/{{ item }}"
       mode: 0600
     loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
+  - name: copy kubeconfigs to remote host
+    copy:
+      dest: "{{ kubernetes_configs_dir }}/"
+      owner: root
+      group: root
+      src: "pki/{{ item }}"
+      mode: 0600
+    loop: 
+    - kube-controller-manager.kubeconfig 
+    - kube-scheduler.kubeconfig
+      
 
 - hosts: workers
   become: true
   tasks: 
-  - name: copy pki to remote host
+  # - name: copy pki to remote host
+  #   copy:
+  #     dest: "{{ pki_directory }}/"
+  #     owner: root
+  #     group: root
+  #     src: "pki/{{ item }}"
+  #     mode: 0600
+  #   loop: "{{ ['kube-proxy'] | product(['crt', 'key']) | map('join', '.') | list }}"
+  - name: copy ca.crt to remote host
     copy:
       dest: "{{ pki_directory }}/"
       owner: root
       group: root
       src: "pki/{{ item }}"
       mode: 0600
-    loop: "{{ ['ca'] | product(['crt', 'key']) | map('join', '.') | list }}"
+    loop: 
+    - ca.crt
+  - name: copy kubeconfigs to remote host
+    copy:
+      dest: "{{ kubernetes_configs_dir }}/"
+      owner: root
+      group: root
+      src: "pki/{{ item }}"
+      mode: 0600
+    loop: 
+    - kube-proxy.kubeconfig 
 
-#generate local admin kubeconfig
-- hosts: localhost
-  tags: test
-  vars: 
-    cluster_name: kubernetes-the-ansible-way
-  tasks:
-  - name: create cluster
-    command: "kubectl config set-cluster {{cluster_name}} --certificate-authority={{playbook_dir}}/pki/ca.crt --embed-certs=true --server=https://{{ hostvars['loadbalancer'].public_ip_address }}:6443"
-
-  - name: create admin credentials
-    command: kubectl config set-credentials admin --client-certificate={{playbook_dir}}/pki/admin.crt --client-key={{playbook_dir}}/pki/admin.key --embed-certs=true
-
-  - name: create admin context
-    command: "kubectl config set-context {{ admin_context_name }} --cluster={{cluster_name}} --user=admin"
 

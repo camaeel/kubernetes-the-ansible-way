@@ -1,0 +1,13 @@
+  - name: "create cluster for {{ entity.user }}"
+    command: "kubectl config set-cluster {{ cluster_name }} --certificate-authority={{playbook_dir}}/pki/ca.crt --embed-certs=true --server=https://{{ entity.server }}:6443 --kubeconfig={{ entity.kubeconfig_path }}"
+
+  - name: "create {{ entity.user }} credentials"
+    command: "kubectl config set-credentials {{ entity.user }} --client-certificate={{playbook_dir}}/pki/{{ entity.cred_filename }}.crt --client-key={{playbook_dir}}/pki/{{ entity.cred_filename }}.key --embed-certs=true --kubeconfig={{ entity.kubeconfig_path }}"
+
+  - name: "create {{ entity.user }} context"
+    command: "kubectl config set-context {{ entity.default | ternary('default', entity.user, entity.user)  }} --cluster={{ cluster_name }} --user={{ entity.user }} --kubeconfig={{ entity.kubeconfig_path }}"
+
+  - name: "set context to default for {{ entity.user }}"
+    command: "kubectl config use-context default --kubeconfig={{ entity.kubeconfig_path }}"
+    when: entity.default is defined and entity.default == True
+
