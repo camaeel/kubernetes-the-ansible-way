@@ -1,0 +1,3 @@
+pki_directory: /etc/pki/k8s
+admin_context_name: k8s-ansible-way
+

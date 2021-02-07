@@ -15,8 +15,7 @@
       src: "{{ pki_directory }}/{{ item }}"
       flat: yes
       dest: pki/
-    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
-    tags: test
+    loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server', 'admin'] | product(['crt', 'key']) | map('join', '.') | list }}"
 
   - name: change access rights
     become: false
@@ -25,7 +24,6 @@
       path: "pki/{{ item }}"
       mode: 0600
     loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
-    tags: test
 
 - hosts: controlplane:!controlplane[0]
   become: true
@@ -38,7 +36,6 @@
       src: "pki/{{ item }}"
       mode: 0600
     loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
-    tags: test
 
 - hosts: workers
   become: true
@@ -51,4 +48,19 @@
       src: "pki/{{ item }}"
       mode: 0600
     loop: "{{ ['ca'] | product(['crt', 'key']) | map('join', '.') | list }}"
-    tags: test
+
+#generate local admin kubeconfig
+- hosts: localhost
+  tags: test
+  vars: 
+    cluster_name: kubernetes-the-ansible-way
+  tasks:
+  - name: create cluster
+    command: "kubectl config set-cluster {{cluster_name}} --certificate-authority={{playbook_dir}}/pki/ca.crt --embed-certs=true --server=https://{{ hostvars['loadbalancer'].public_ip_address }}:6443"
+
+  - name: create admin credentials
+    command: kubectl config set-credentials admin --client-certificate={{playbook_dir}}/pki/admin.crt --client-key={{playbook_dir}}/pki/admin.key --embed-certs=true
+
+  - name: create admin context
+    command: "kubectl config set-context {{ admin_context_name }} --cluster={{cluster_name}} --user=admin"
+
