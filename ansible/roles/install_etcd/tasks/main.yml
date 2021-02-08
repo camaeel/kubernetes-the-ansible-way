@@ -4,18 +4,47 @@
     url: "{{ etcd_download_url }}/{{ etcd_version }}/SHA256SUMS"
     dest: /tmp/etcd-{{ etcd_version }}-sha256sums
   become: False
+  
+- name: create downloads dir
+  file: 
+    state: directory
+    path: "{{ ansible_env.HOME }}/downloads"
 
-- debug:
-    var:
-      '{{ lookup("file", "/tmp/etcd-"+etcd_version+"-sha256sums").splitlines() }}'
-      
 - name: "Download etcd {{ etcd_version }}"
   get_url:
     url: "{{ etcd_download_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
-    dest: "/tmp/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+    dest: "{{ ansible_env.HOME }}/downloads/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
     checksum: 'sha256:{{ etcd_checksums[0].split()[0] }}'
   vars:
     etcd_checksums: '{{ lookup("file", "/tmp/etcd-"+etcd_version+"-sha256sums").splitlines() | select("match", ".*etcd-"+ etcd_version +"-linux-amd64.tar.gz$") | list }}'
 
+- name: "extract etcd"
+  unarchive:
+    remote_src: True
+    src: "{{ ansible_env.HOME }}/downloads/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
+    dest: "{{ ansible_env.HOME }}/downloads/"
+
+- name: "copy binaries to /usr/bin"
+  copy:
+    dest: /usr/local/bin/
+    src: "{{ ansible_env.HOME }}/downloads/etcd-{{ etcd_version }}-linux-amd64/{{ item }}"
+    remote_src: True
+    mode: a+x
+  loop:
+  - etcd
+  - etcdctl
+  notify: restart etcd
+
+- name: create etcd data directory
+  file:
+    state: directory
+    path: "{{ etcd_data_dir }}"
+
+- name: template service config
+  template:
+    src: etcd.j2.service
+    dest: /etc/systemd/system/etcd.service
+  notify: restart etcd
+    
 
 

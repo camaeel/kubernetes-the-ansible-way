@@ -2,3 +2,5 @@
 ansible_user: "ubuntu"
 kubernetes_configs_dir: /etc/k8s
 etcd_version: v3.4.14
+initial_etcd_cluster_token: etcd-cluster-0
+etcd_data_dir: /var/lib/etcd

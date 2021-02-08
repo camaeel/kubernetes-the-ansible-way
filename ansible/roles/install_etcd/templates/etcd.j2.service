@@ -4,23 +4,23 @@ Documentation=https://github.com/coreos
 
 [Service]
 ExecStart=/usr/local/bin/etcd \\
-  --name ${ETCD_NAME} \\
-  --cert-file=/etc/etcd/etcd-server.crt \\
-  --key-file=/etc/etcd/etcd-server.key \\
-  --peer-cert-file=/etc/etcd/etcd-server.crt \\
-  --peer-key-file=/etc/etcd/etcd-server.key \\
-  --trusted-ca-file=/etc/etcd/ca.crt \\
-  --peer-trusted-ca-file=/etc/etcd/ca.crt \\
+  --name {{ inventory_hostname }} \\
+  --cert-file={{ pki_directory }}/etcd-server.crt \\
+  --key-file={{ pki_directory }}/etcd-server.key \\
+  --peer-cert-file={{ pki_directory }}/etcd-server.crt \\
+  --peer-key-file={{ pki_directory }}/etcd-server.key \\
+  --trusted-ca-file={{ pki_directory }}/ca.crt \\
+  --peer-trusted-ca-file={{ pki_directory }}/ca.crt \\
   --peer-client-cert-auth \\
   --client-cert-auth \\
-  --initial-advertise-peer-urls https://${INTERNAL_IP}:2380 \\
-  --listen-peer-urls https://${INTERNAL_IP}:2380 \\
-  --listen-client-urls https://${INTERNAL_IP}:2379,https://127.0.0.1:2379 \\
-  --advertise-client-urls https://${INTERNAL_IP}:2379 \\
-  --initial-cluster-token etcd-cluster-0 \\
-  --initial-cluster master-1=https://192.168.5.11:2380,master-2=https://192.168.5.12:2380 \\
+  --initial-advertise-peer-urls https://{{ private_ip_address }}:2380 \\
+  --listen-peer-urls https://{{ private_ip_address }}:2380 \\
+  --listen-client-urls {{ groups['controlplane'] | map('extract', hostvars, ['private_ip_address']) | map('regex_replace', '^(.*)$', 'https://\\1:2379') | join(',')  }},https://127.0.0.1:2379 \\
+  --advertise-client-urls {{ groups['controlplane'] | map('extract', hostvars, ['private_ip_address']) | map('regex_replace', '^(.*)$', 'https://\\1:2379') | join(',')  }} \\
+  --initial-cluster-token {{ initial_etcd_cluster_token }} \\
+  --initial-cluster {% for h in groups['controlplane'] %}{{ hostvars[h].inventory_hostname + '=https://' + hostvars[h].private_ip_address + ':2380' }}{% if not loop.last %}{{ ',' }}{% endif %}{% endfor %} \\
   --initial-cluster-state new \\
-  --data-dir=/var/lib/etcd
+  --data-dir={{ etcd_data_dir }}
 Restart=on-failure
 RestartSec=5
 
