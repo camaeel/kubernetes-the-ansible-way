@@ -21,6 +21,8 @@
     - dataEncipherment
     - keyCertSign
     - cRLSign
+    basic_constraints:
+    - CA:TRUE
 
 - name: create root ca certificates
   openssl_certificate:
