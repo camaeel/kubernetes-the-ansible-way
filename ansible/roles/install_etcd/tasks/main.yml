@@ -50,6 +50,8 @@
 # check nodes:
 # sudo ETCDCTL_API=3 etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt --cert=/etc/pki/k8s/etcd-server.crt --key=/etc/pki/k8s/etcd-server.key
 # TODO: test if data can be put in and retrieved
+# sudo ETCDCTL_API=3 etcdctl put foo bar --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt --cert=/etc/pki/k8s/etcd-server.crt --key=/etc/pki/k8s/etcd-server.key
+# sudo ETCDCTL_API=3 etcdctl get foo --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt --cert=/etc/pki/k8s/etcd-server.crt --key=/etc/pki/k8s/etcd-server.key
 
 # TODO: [IMPROVEMENT] provide backup solution
 
