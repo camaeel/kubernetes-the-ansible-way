@@ -46,5 +46,10 @@
     dest: /etc/systemd/system/etcd.service
   notify: restart etcd
     
+# TODO: testing etcd cluster
+# check nodes:
+# sudo ETCDCTL_API=3 etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt --cert=/etc/pki/k8s/etcd-server.crt --key=/etc/pki/k8s/etcd-server.key
+# TODO: test if data can be put in and retrieved
 
+# TODO: [IMPROVEMENT] provide backup solution
 
