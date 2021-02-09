@@ -8,7 +8,7 @@
     path: "{{ pki_directory }}/{{ entity.name }}.csr"
     privatekey_path: "{{ pki_directory }}/{{ entity.name }}.key"
     common_name: "{{ entity.cn | default(entity.name) }}"
-    organization_name: "{{ entity.on | default('') }}"
+    organization_name: "{{ entity.organization_name | default('') }}"
     key_usage: "{{ entity.key_usage | default([]) }}"
     extended_key_usage: "{{ entity.extended_key_usage | default([]) }}"
     subject_alt_name: "{{ entity.subject_alt_name_list | default([]) | flatten }}"

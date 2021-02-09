@@ -37,7 +37,7 @@
   vars:
     entity:
       name: admin
-      on: system:masters
+      organization_name: system:masters
       extended_key_usage: 
       - clientAuth
 
