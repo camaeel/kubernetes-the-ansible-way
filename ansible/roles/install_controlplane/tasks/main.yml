@@ -87,3 +87,42 @@
     enabled: True
 
 # TODO check all controlplane component healthschecks. kubectl get componentstatuses is deprecated since 1.19.
+# test healthchecks
+- name: get kube-apiserver healthcheck endpoint
+  uri:
+    url: "https://{{ private_ip_address }}:6443/livez"
+    return_content: yes
+    validate_certs: no
+  register: kube_apiserver_healthcheck_result
+
+- name: test kube-apiserver healthcheck response
+  fail:
+    msg: 'kube-apiserver healthcheck failed'
+  when: "'ok' not in kube_apiserver_healthcheck_result.content"
+
+
+- name: get kube-controller-manager healthcheck endpoint
+  uri:
+    url: "http://{{ private_ip_address }}:10252/healthz"
+    return_content: yes
+    validate_certs: no
+  register: kube_controller_manager_healthcheck_result
+
+- name: test kube-controller-manager healthcheck response
+  fail:
+    msg: 'kube-controller-manager healthcheck failed'
+  when: "'ok' not in kube_controller_manager_healthcheck_result.content"
+
+
+- name: get kube-scheduler healthcheck endpoint
+  uri:
+    url: "http://{{ private_ip_address }}:10251/healthz"
+    return_content: yes
+    validate_certs: no
+  register: kube_scheduler_healthcheck_result
+
+- name: test kube-scheduler healthcheck response
+  fail:
+    msg: 'kube-scheduler healthcheck failed'
+  when: "'ok' not in kube_scheduler_healthcheck_result.content"
+
