@@ -37,34 +37,51 @@
   - kube-controller-manager
   - kube-scheduler
 
+- name: template service config - kube-apiserver
+  template: 
+    src: "kube-apiserver.j2.service"
+    dest: "/etc/systemd/system/kube-apiserver.service"
+  notify:
+  - "restart kube-apiserver"
+
 - name: template service config
   template: 
-    src: "{{ item }}.j2.service"
-    dest: "/etc/systemd/system/{{ item }}.service"
-  loop:
-  - kube-apiserver
-  - kube-controller-manager
-  - kube-scheduler  
+    src: "kube-controller-manager.j2.service"
+    dest: "/etc/systemd/system/kube-controller-manager.service"
   notify:
-  - "restart {{item}}"
+  - "restart kube-controller-manager"
+
+- name: template service config
+  template: 
+    src: "kube-scheduler.j2.service"
+    dest: "/etc/systemd/system/kube-scheduler.service" 
+  notify:
+  - "restart kube-scheduler"
   
-- name: restart kube-apiserver
+- name: template kube-scheduler yaml config
+  template: 
+    src: kube-scheduler.j2.yaml
+    dest: "{{ kubernetes_configs_dir }}/kube-scheduler.yaml"
+  notify:
+  - "restart kube-scheduler"
+
+- name: start kube-apiserver
   systemd: 
     state: started
     daemon_reload: yes
     name: kube-apiserver 
     enabled: True
 
-- name: restart kube-controller-manager
+- name: start kube-controller-manager
   systemd: 
-    state: restarted
+    state: started
     daemon_reload: yes
     name: kube-controller-manager 
     enabled: True
 
-- name: restart kube-scheduler
+- name: start kube-scheduler
   systemd: 
-    state: restarted
+    state: started
     daemon_reload: yes
     name: kube-scheduler 
     enabled: True
