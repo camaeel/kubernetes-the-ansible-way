@@ -85,3 +85,5 @@
     daemon_reload: yes
     name: kube-scheduler 
     enabled: True
+
+# TODO check all controlplane component healthschecks. kubectl get componentstatuses is deprecated since 1.19.
