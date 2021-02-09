@@ -1,10 +1,3 @@
-- name: get checksums file
-  local_action:
-    module: get_url
-    url: "{{ etcd_download_url }}/{{ etcd_version }}/SHA256SUMS"
-    dest: /tmp/etcd-{{ etcd_version }}-sha256sums
-  become: False
-  
 - name: create downloads dir
   file: 
     state: directory
@@ -14,9 +7,7 @@
   get_url:
     url: "{{ etcd_download_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
     dest: "{{ ansible_env.HOME }}/downloads/etcd-{{ etcd_version }}-linux-amd64.tar.gz"
-    checksum: 'sha256:{{ etcd_checksums[0].split()[0] }}'
-  vars:
-    etcd_checksums: '{{ lookup("file", "/tmp/etcd-"+etcd_version+"-sha256sums").splitlines() | select("match", ".*etcd-"+ etcd_version +"-linux-amd64.tar.gz$") | list }}'
+    checksum: 'sha256:{{ etcd_download_url }}/{{ etcd_version }}/SHA256SUMS'
 
 - name: "extract etcd"
   unarchive:
