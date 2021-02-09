@@ -99,7 +99,13 @@
 - hosts: controlplane
   become: True
   roles:
+
   - name: secret_encryption
     tags: secret_encryption
+
   - name: install_etcd
     tags: install_etcd
+
+  - name: install_controlplane
+    tags: install_controlplane
+

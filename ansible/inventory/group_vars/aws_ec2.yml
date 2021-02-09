@@ -1,6 +1,10 @@
 #set remote users to ubuntu's default
 ansible_user: "ubuntu"
-kubernetes_configs_dir: /etc/k8s
+kubernetes_configs_dir: /var/lib/kubernetes
 etcd_version: v3.4.14
 initial_etcd_cluster_token: etcd-cluster-0
 etcd_data_dir: /var/lib/etcd
+kubernetes_version: v1.20.2
+# current kubernetes stable version can be checked at https://dl.k8s.io/release/stable.txt
+
+

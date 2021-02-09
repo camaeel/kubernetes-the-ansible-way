@@ -1,5 +1,5 @@
 - name: template encryption config
   template:
     src: encryption-config.j2.yml
-    dest: /etc/k8s/encryption-config.yml
+    dest: "{{ kubernetes_configs_dir }}/encryption-config.yml"
     mode: 0600
