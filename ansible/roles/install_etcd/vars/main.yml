@@ -1,1 +1,2 @@
 etcd_download_url: "https://github.com/coreos/etcd/releases/download"
+etcd_health_check_port: 2381

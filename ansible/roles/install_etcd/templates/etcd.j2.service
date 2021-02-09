@@ -20,7 +20,7 @@ ExecStart=/usr/local/bin/etcd \
   --initial-cluster-token {{ initial_etcd_cluster_token }} \
   --initial-cluster {% for h in groups['controlplane'] %}{{ hostvars[h].inventory_hostname + '=https://' + hostvars[h].private_ip_address + ':2380' }}{% if not loop.last %}{{ ',' }}{% endif %}{% endfor %} \
   --initial-cluster-state new \
-  --listen-metrics-urls http://{{ private_ip_address }}:2381,http://127.0.0.1:2381 \
+  --listen-metrics-urls http://{{ private_ip_address }}:{{ etcd_health_check_port }},http://127.0.0.1:{{ etcd_health_check_port }} \
   --data-dir={{ etcd_data_dir }}
 Restart=on-failure
 RestartSec=5

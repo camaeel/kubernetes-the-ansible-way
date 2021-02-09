@@ -44,9 +44,20 @@
     enabled: True
     daemon_reload: True
 
+# test healthcheck
+- name: get etcd healthcheck endpoint
+  uri:
+    url: "http://{{ private_ip_address }}:{{ etcd_health_check_port }}/health"
+    return_content: yes
+  register: etcd_healthcheck_result
+
+- name: test etcd healthcheck response
+  fail:
+    msg: 'etcd healthcheck failed'
+  when: "'{\"health\":\"true\"}' not in etcd_healthcheck_result.content"
 
 
-# TODO: testing etcd cluster
+# TODO: test if etcd cluster works correctly
 # check nodes:
 # sudo ETCDCTL_API=3 etcdctl member list --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt --cert=/etc/pki/k8s/etcd-server.crt --key=/etc/pki/k8s/etcd-server.key
 # TODO: test if data can be put in and retrieved
