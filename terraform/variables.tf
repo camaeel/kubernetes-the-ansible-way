@@ -2,13 +2,13 @@
 variable "aws_region" {
   type = string
   description = "AWS region"
-  default     = "eu-central-1"
+  default     = "eu-north-1"
 }
 
 variable "aws_zones" {
   type = list(string)
   description = "AWS availability zones"
-  default     = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+  default     = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
 }
 variable "additional_tags" {
   default     = {"project": "kubernetes-the-ansible-way"}
@@ -19,7 +19,7 @@ variable "additional_tags" {
 variable "loadbalancer_node_size" {
   type = string
   description = "K8s loadbalancer node size"
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "controlplane_nodes_number" {
@@ -32,7 +32,7 @@ variable "controlplane_nodes_number" {
 variable "controlplane_node_size" {
   type = string
   description = "K8s controlplane node size"
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 variable "worker_nodes_number" {
@@ -44,7 +44,7 @@ variable "worker_nodes_number" {
 variable "worker_node_size" {
   type = string
   description = "K8s worker node size"
-  default     = "t2.micro"
+  default     = "t3.micro"
 }
 
 # networks

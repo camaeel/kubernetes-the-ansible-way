@@ -2,6 +2,6 @@ terraform {
   backend "s3" {
     bucket = "some-unique-name"
     key    = "kubernetes-the-ansible-way"
-    region = "eu-central-1"
+    region = "eu-north-1"
   }
 }

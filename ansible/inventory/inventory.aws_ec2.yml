@@ -20,4 +20,4 @@ keyed_groups:
 
 #narrowing only to selected regions greatly optimizes inventory read time
 regions:
-- eu-central-1
+- eu-north-1
