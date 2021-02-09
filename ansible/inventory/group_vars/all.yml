@@ -1,4 +1,7 @@
 pki_directory: /etc/pki/k8s
 admin_context_name: k8s-ansible-way
 cluster_name: kubernetes-the-ansible-way
+service_ip_range: 10.96.0.0/24
+service_nodeport_range: 30000-32767
+cluster_cidr: 10.10.0.0/16
 

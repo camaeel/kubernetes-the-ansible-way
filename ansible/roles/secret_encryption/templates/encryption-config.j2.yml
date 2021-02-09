@@ -7,5 +7,5 @@ resources:
       - aescbc:
           keys:
             - name: key1
-              secret: {{ lookup('password', 'pki/encryption.secret length=64') | b64encode }}
+              secret: {{ lookup('password', 'pki/encryption.secret length=32') | b64encode }}
       - identity: {}
