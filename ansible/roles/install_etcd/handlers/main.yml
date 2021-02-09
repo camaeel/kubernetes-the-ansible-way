@@ -2,6 +2,5 @@
   systemd:
     name: etcd
     state: restarted
-    enabled: True
     daemon_reload: True
 
