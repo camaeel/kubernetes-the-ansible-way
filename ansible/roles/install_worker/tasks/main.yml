@@ -1,0 +1,52 @@
+- name: create directories
+  file: 
+    path: "{{ item }}"
+    state: directory
+  loop:
+  - /etc/cni/net.d
+  - /opt/cni/bin
+  - /var/lib/kubelet
+  - /var/lib/kube-proxy
+  - "{{ kubernetes_configs_dir }}"
+  - /var/run/kubernetes
+  - "{{ ansible_env.HOME }}/downloads"
+
+- name: download crictl
+  get_url: 
+    url: "{{ crictl_download_url }}/{{ crictl_version }}/crictl-{{ crictl_version }}-{{ crictl_architecture }}.tar.gz"  
+    checksum: "sha256:{{ crictl_checksum }}"
+    dest: "{{ ansible_env.HOME }}/downloads"
+
+- name: unpack crictl
+  unarchive:
+    src: "{{ ansible_env.HOME }}/downloads/crictl-{{ crictl_version }}-{{ crictl_architecture }}.tar.gz"
+    dest: /usr/local/bin
+    mode: +x
+    remote_src: yes
+
+- name: download runc
+  get_url: 
+    url: "{{ runc_download_url }}/{{ runc_version }}/runc.{{ runc_architecture }}"  
+    checksum: "sha256:{{ runc_download_url }}/{{ runc_version }}/runc.sha256sum"
+    dest: "{{ ansible_env.HOME }}/downloads"
+
+- name: copy runc
+  copy: 
+    remote_src: True
+    src: "{{ ansible_env.HOME }}/downloads/runc.{{ runc_architecture }}"
+    dest: /usr/local/bin/
+    mode: +x
+
+- name: download cni plugin
+  get_url:
+    url: "{{ cni_plugin_download_url }}/{{ cni_plugin_version }}/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz"  
+    checksum: "sha256:{{ cni_plugin_download_url }}/{{ cni_plugin_version }}/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz.sha256"
+    dest: "{{ ansible_env.HOME }}/downloads"
+
+- name: unpack cni plugin
+  unarchive:
+    src: "{{ ansible_env.HOME }}/downloads/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz"
+    dest: /opt/cni/bin
+    remote_src: yes
+
+  

@@ -134,4 +134,8 @@
     - conntrack
     - ipset
 
+  - role: install_worker
+    tags: 
+    - install_worker
+    
 

@@ -1,0 +1,9 @@
+crictl_download_url: https://github.com/kubernetes-sigs/cri-tools/releases/download
+crictl_architecture: linux-amd64
+
+runc_download_url: https://github.com/opencontainers/runc/releases/download
+runc_architecture: amd64
+
+cni_plugin_download_url: https://github.com/containernetworking/plugins/releases/download
+cni_plugin_architecture: linux-amd64
+
