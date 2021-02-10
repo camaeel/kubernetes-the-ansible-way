@@ -10,6 +10,7 @@
   - "{{ kubernetes_configs_dir }}"
   - /var/run/kubernetes
   - "{{ ansible_env.HOME }}/downloads"
+  - "{{ ansible_env.HOME }}/downloads/containerd"
 
 - name: download crictl
   get_url: 
@@ -34,7 +35,7 @@
   copy: 
     remote_src: True
     src: "{{ ansible_env.HOME }}/downloads/runc.{{ runc_architecture }}"
-    dest: /usr/local/bin/
+    dest: /usr/local/bin/runc
     mode: +x
 
 - name: download cni plugin
@@ -49,4 +50,30 @@
     dest: /opt/cni/bin
     remote_src: yes
 
-  
+- name: download containerd
+  get_url:
+    url: "{{ containerd_download_url }}/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz"  
+    checksum: "sha256:{{ containerd_download_url }}/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz.sha256sum"
+    dest: "{{ ansible_env.HOME }}/downloads"
+
+- name: unpack containerd
+  unarchive:
+    src: "{{ ansible_env.HOME }}/downloads/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz"
+    dest: "{{ ansible_env.HOME }}/downloads/containerd"
+    remote_src: yes
+
+- name: find files to copy
+  find: 
+    paths: "{{ ansible_env.HOME }}/downloads/containerd/bin" 
+    recurse: yes 
+    # patterns: "*"
+  register: containerd_file_to_copy
+
+- name: copy containerd
+  copy:
+    src: "{{ item.path }}"
+    dest: "/bin/"
+    remote_src: yes
+    mode: preserve
+  loop: "{{ containerd_file_to_copy.files }}"
+

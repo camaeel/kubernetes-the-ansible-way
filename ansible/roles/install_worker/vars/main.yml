@@ -7,3 +7,6 @@ runc_architecture: amd64
 cni_plugin_download_url: https://github.com/containernetworking/plugins/releases/download
 cni_plugin_architecture: linux-amd64
 
+containerd_download_url: https://github.com/containerd/containerd/releases/download
+containerd_architecture: linux-amd64
+
