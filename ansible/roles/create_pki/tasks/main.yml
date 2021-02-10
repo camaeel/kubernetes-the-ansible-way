@@ -107,3 +107,21 @@
   vars:
     entity:
       name: service-account
+
+# worker nodes certificates
+- name: generate worker certs
+  include_tasks: 
+    file: create_certificate.yml    
+  vars:
+    entity:
+      name: "{{ item }}"
+      cn: "system:node:{{ item }}"
+      organization_name: system:nodes
+      key_usage: 
+      - nonRepudiation
+      - digitalSignature
+      - keyEncipherment
+      subject_alt_name_list:
+      - "DNS:{{ item }}"
+      - "IP:{{ hostvars[item].private_ip_address }}"  
+  loop: "{{ groups['workers'] }}"

@@ -42,7 +42,24 @@
         server: "{{ hostvars['loadbalancer'].private_ip_address }}"
         user: system:kube-scheduler
         cred_filename: kube-scheduler 
-        default: True            
+        default: True        
+
+  tasks: 
+  - name: generate_kubeconfig for worker nodes
+    include_role:
+      name: generate_kubeconfig
+      apply:
+        tags:
+          - generate_kubeconfig      
+    tags: generate_kubeconfig
+    vars: 
+      entity:
+        kubeconfig_path: "{{ pki_directory }}/{{ item }}.kubeconfig"
+        server: "{{ hostvars['loadbalancer'].private_ip_address }}"
+        user: "system:node:{{ item }}"
+        cred_filename: "{{ item }}"
+        default: True
+    loop: "{{ groups['workers'] }}"
 
 - hosts: controlplane
   become: true
@@ -55,6 +72,7 @@
       src: "pki/{{ item }}"
       mode: 0600
     loop: "{{ ['ca', 'kube-apiserver', 'service-account', 'etcd-server'] | product(['crt', 'key']) | map('join', '.') | list }}"
+
   - name: copy kubeconfigs to remote host
     copy:
       dest: "{{ kubernetes_configs_dir }}/"
@@ -69,15 +87,7 @@
 - hosts: workers
   become: true
   tasks: 
-  # - name: copy pki to remote host
-  #   copy:
-  #     dest: "{{ pki_directory }}/"
-  #     owner: root
-  #     group: root
-  #     src: "pki/{{ item }}"
-  #     mode: 0600
-  #   loop: "{{ ['kube-proxy'] | product(['crt', 'key']) | map('join', '.') | list }}"
-  - name: copy ca.crt to remote host
+  - name: copy pki to worker host
     copy:
       dest: "{{ pki_directory }}/"
       owner: root
@@ -86,6 +96,9 @@
       mode: 0600
     loop: 
     - ca.crt
+    - "{{ inventory_hostname }}.crt"
+    - "{{ inventory_hostname }}.key"
+
   - name: copy kubeconfigs to remote host
     copy:
       dest: "{{ kubernetes_configs_dir }}/"
@@ -95,6 +108,7 @@
       mode: 0600
     loop: 
     - kube-proxy.kubeconfig 
+    - "{{ inventory_hostname }}.kubeconfig"
 
 - hosts: controlplane
   become: True
@@ -108,4 +122,16 @@
 
   - name: install_controlplane
     tags: install_controlplane
+
+- hosts: workers
+  become: true
+  roles:
+  - role: install_packages
+    tags:
+    - install_packages
+    add_packages_list:
+    - socat
+    - conntrack
+    - ipset
+
 
