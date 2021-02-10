@@ -94,3 +94,41 @@
     state: started
     enabled: True
     daemon_reload: True
+
+
+# Optionally we could create a temporary directory
+- name: create local tmp directory for checksums
+  local_action:
+    module: file
+    state: directory
+    path: /tmp/k8s-checksums-{{ kubernetes_version }}-{{ k8s_architecture }}
+  become: False 
+
+- name: download sha256 checksums
+  local_action:
+    module: get_url
+    url: "{{ k8s_download_url }}/{{ kubernetes_version }}/bin/{{ k8s_architecture }}/{{ item }}.sha256"
+    dest: /tmp/k8s-checksums-{{ kubernetes_version }}-{{ k8s_architecture }}
+  become: False  
+  loop:
+  - kubelet
+  - kube-proxy
+  
+- name: "download kubernetes binaries - version: {{ kubernetes_version }}"
+  get_url: 
+    url: "{{ k8s_download_url }}/{{ kubernetes_version }}/bin/{{ k8s_architecture }}/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: a+x
+    checksum: "sha256:{{ checksum_var }}"
+  vars:
+    checksum_var: "{{ lookup('file', '/tmp/k8s-checksums-'+kubernetes_version+'-'+k8s_architecture+'/'+item+'.sha256') }}"
+  loop:
+  - kubelet
+  - kube-proxy
+
+# configure CNI
+# kubelet-config.yml
+# kubelet.service
+# kube-proxy-config.yaml
+# kube-proxy.service
+
