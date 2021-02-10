@@ -39,6 +39,13 @@ Install requirements:
 1. Install kubectl v1.20+
 1. Install python libraries: boto3, botocore
 1. Provide AWS credentials to ansible
+1. (optional) install pdmenu
+
+## Setup helpers on your local machine
+1. You can generate additional file for pdmenu. You can add it to your menu or use it as your main menu to easily access instances without copy-pasting ip addresses.
+    1. Run `ansible-playbook -i inventory/inventory.aws_ec2.yml 0_helpers.yml`
+    1. Add to your menu in `.pdmenurc` file: `show:_K8s ansible way..::k8s_ansible_way`
+    1. Add at the end of your `.pdmenurc` file: `/home/kamil/.k8s_ansible_way_pdmenurc` (don't forget to adjust username in the path)
 
 ## Prepare EC2 instances
 This step updates VMs OS, installs required packages, disables swap. 

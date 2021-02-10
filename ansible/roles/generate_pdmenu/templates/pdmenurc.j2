@@ -1,0 +1,6 @@
+menu:{{ pdmenu_name }}:{{ pdmenu_name }}:
+{% for host in hostvars %}
+      exec:{{ host }}::ssh {{ hostvars[host].ansible_user }}@{{ hostvars[host].ansible_host }}
+{% endfor %}
+      nop
+      exit:E_xit

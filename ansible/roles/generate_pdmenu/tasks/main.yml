@@ -1,0 +1,5 @@
+- name: template pdmenurc file
+  local_action:
+    module: template
+    src: pdmenurc.j2
+    dest: "~/.{{ pdmenu_name }}_pdmenurc"
