@@ -4,6 +4,7 @@
     state: directory
   loop:
   - /etc/cni/net.d
+  - /etc/containerd
   - /opt/cni/bin
   - /var/lib/kubelet
   - /var/lib/kube-proxy
@@ -77,3 +78,19 @@
     mode: preserve
   loop: "{{ containerd_file_to_copy.files }}"
 
+- name: configure containerd
+  template:
+    src: config.j2.toml
+    dest: /etc/containerd/config.toml
+
+- name: configure containerd service
+  template:
+    src: containerd.j2.service
+    dest: /etc/systemd/system/containerd.service
+
+- name: start containerd
+  systemd:
+    name: containerd
+    state: started
+    enabled: True
+    daemon_reload: True
