@@ -45,6 +45,13 @@
     daemon_reload: True
 
 # test healthcheck
+
+- name: Wait for etcd healthcheck port to become open
+  wait_for:
+    port: "{{ etcd_health_check_port }}"
+    delay: 10
+    timeout: 300
+
 - name: get etcd healthcheck endpoint
   uri:
     url: "http://{{ private_ip_address }}:{{ etcd_health_check_port }}/health"

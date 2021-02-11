@@ -88,6 +88,13 @@
 
 # TODO check all controlplane component healthschecks. kubectl get componentstatuses is deprecated since 1.19.
 # test healthchecks
+
+- name: Wait for kube-apiserver port to become open
+  wait_for:
+    port: 6443
+    delay: 10
+    timeout: 300
+
 - name: get kube-apiserver healthcheck endpoint
   uri:
     url: "https://{{ private_ip_address }}:6443/livez"
@@ -100,6 +107,11 @@
     msg: 'kube-apiserver healthcheck failed'
   when: "'ok' not in kube_apiserver_healthcheck_result.content"
 
+- name: Wait for kube-controller-manager port to become open
+  wait_for:
+    port: 10252
+    delay: 10
+    timeout: 300
 
 - name: get kube-controller-manager healthcheck endpoint
   uri:
@@ -113,6 +125,11 @@
     msg: 'kube-controller-manager healthcheck failed'
   when: "'ok' not in kube_controller_manager_healthcheck_result.content"
 
+- name: Wait for kube-scheduler port to become open
+  wait_for:
+    port: 10251
+    delay: 10
+    timeout: 300
 
 - name: get kube-scheduler healthcheck endpoint
   uri:
