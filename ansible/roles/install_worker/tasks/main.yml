@@ -274,17 +274,8 @@
   tags: kube-proxy  
   
 
-# kube-proxy-config.yaml
-# kube-proxy.service
+
+
 # configure CNI
-
-# - name: start kube-proxy
-#   systemd: 
-#     state: started
-#     daemon_reload: yes
-#     name: kube-proxy
-#     enabled: yes
-
-
 
 
