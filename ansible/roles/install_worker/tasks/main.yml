@@ -277,5 +277,24 @@
 
 
 # configure CNI
+# - name: install calico - 1
+#   local_action:
+#     module: command
+#     cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml"
+#   become: false
+#   run_once: True
+#   tags:
+#   - cni
+#   - calico
+
+# - name: install calico - 2
+#   local_action:
+#     module: command
+#     cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml"
+#   become: false
+#   run_once: True
+#   tags:
+#   - cni
+#   - calico
 
 
