@@ -1,6 +1,11 @@
 #set remote users to ubuntu's default
 ansible_user: "ubuntu"
+
 kubernetes_configs_dir: /var/lib/kubernetes
+kubelet_config_dir: /var/lib/kubelet
+kube_proxy_config_dir: /var/lib/kube-proxy
+pki_directory: /etc/pki/k8s
+
 etcd_version: v3.4.14
 initial_etcd_cluster_token: etcd-cluster-0
 etcd_data_dir: /var/lib/etcd

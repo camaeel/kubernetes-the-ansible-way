@@ -6,18 +6,27 @@
   - /etc/cni/net.d
   - /etc/containerd
   - /opt/cni/bin
-  - /var/lib/kubelet
-  - /var/lib/kube-proxy
+  - "{{ kubelet_config_dir }}"
+  - "{{ kube_proxy_config_dir }}"
   - "{{ kubernetes_configs_dir }}"
   - /var/run/kubernetes
   - "{{ ansible_env.HOME }}/downloads"
   - "{{ ansible_env.HOME }}/downloads/containerd"
-
+  tags: 
+  - kubelet
+  - crictl
+  - containerd
+  - runc
+  - cni
+  - kube-proxy
+  
 - name: download crictl
   get_url: 
     url: "{{ crictl_download_url }}/{{ crictl_version }}/crictl-{{ crictl_version }}-{{ crictl_architecture }}.tar.gz"  
     checksum: "sha256:{{ crictl_checksum }}"
     dest: "{{ ansible_env.HOME }}/downloads"
+  tags:
+  - crictl
 
 - name: unpack crictl
   unarchive:
@@ -25,12 +34,16 @@
     dest: /usr/local/bin
     mode: +x
     remote_src: yes
-
+  tags:
+  - crictl
+  
 - name: download runc
   get_url: 
     url: "{{ runc_download_url }}/{{ runc_version }}/runc.{{ runc_architecture }}"  
     checksum: "sha256:{{ runc_download_url }}/{{ runc_version }}/runc.sha256sum"
     dest: "{{ ansible_env.HOME }}/downloads"
+  tags: 
+  - runc
 
 - name: copy runc
   copy: 
@@ -38,30 +51,40 @@
     src: "{{ ansible_env.HOME }}/downloads/runc.{{ runc_architecture }}"
     dest: /usr/local/bin/runc
     mode: +x
+  tags: 
+  - runc
 
 - name: download cni plugin
   get_url:
     url: "{{ cni_plugin_download_url }}/{{ cni_plugin_version }}/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz"  
     checksum: "sha256:{{ cni_plugin_download_url }}/{{ cni_plugin_version }}/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz.sha256"
     dest: "{{ ansible_env.HOME }}/downloads"
+  tags: 
+  - cni
 
 - name: unpack cni plugin
   unarchive:
     src: "{{ ansible_env.HOME }}/downloads/cni-plugins-{{ cni_plugin_architecture }}-{{ cni_plugin_version }}.tgz"
     dest: /opt/cni/bin
     remote_src: yes
+  tags: 
+  - cni
 
 - name: download containerd
   get_url:
     url: "{{ containerd_download_url }}/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz"  
     checksum: "sha256:{{ containerd_download_url }}/v{{ containerd_version }}/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz.sha256sum"
     dest: "{{ ansible_env.HOME }}/downloads"
+  tags: 
+  - containerd
 
 - name: unpack containerd
   unarchive:
     src: "{{ ansible_env.HOME }}/downloads/containerd-{{ containerd_version }}-{{ containerd_architecture }}.tar.gz"
     dest: "{{ ansible_env.HOME }}/downloads/containerd"
     remote_src: yes
+  tags: 
+  - containerd
 
 - name: find files to copy
   find: 
@@ -69,6 +92,8 @@
     recurse: yes 
     # patterns: "*"
   register: containerd_file_to_copy
+  tags: 
+  - containerd
 
 - name: copy containerd
   copy:
@@ -77,16 +102,29 @@
     remote_src: yes
     mode: preserve
   loop: "{{ containerd_file_to_copy.files }}"
+  tags: 
+  - containerd
 
 - name: configure containerd
   template:
     src: config.j2.toml
     dest: /etc/containerd/config.toml
+  notify: restart containerd
+  tags: 
+  - containerd
 
 - name: configure containerd service
   template:
     src: containerd.j2.service
     dest: /etc/systemd/system/containerd.service
+  notify: restart containerd
+  tags: 
+  - containerd
+
+- name: flush handlers
+  meta: flush_handlers
+  tags: 
+  - containerd
 
 - name: start containerd
   systemd:
@@ -94,7 +132,8 @@
     state: started
     enabled: True
     daemon_reload: True
-
+  tags: 
+  - containerd
 
 # Optionally we could create a temporary directory
 - name: create local tmp directory for checksums
@@ -103,6 +142,9 @@
     state: directory
     path: /tmp/k8s-checksums-{{ kubernetes_version }}-{{ k8s_architecture }}
   become: False 
+  tags: 
+  - kubelet
+  - kube-proxy
 
 - name: download sha256 checksums
   local_action:
@@ -113,7 +155,10 @@
   loop:
   - kubelet
   - kube-proxy
-  
+  tags: 
+  - kubelet
+  - kube-proxy
+
 - name: "download kubernetes binaries - version: {{ kubernetes_version }}"
   get_url: 
     url: "{{ k8s_download_url }}/{{ kubernetes_version }}/bin/{{ k8s_architecture }}/{{ item }}"
@@ -125,10 +170,121 @@
   loop:
   - kubelet
   - kube-proxy
+  tags: 
+  - kubelet
+  - kube-proxy
 
-# configure CNI
-# kubelet-config.yml
-# kubelet.service
+- name: create kubelet-config.yaml
+  template:
+    src: kubelet-config.j2.yaml
+    dest: "{{ kubelet_config_dir }}/kubelet-config.yaml"
+  notify: restart kubelet
+  tags: kubelet
+
+- name: create kubelet.service
+  template: 
+    src: kubelet.j2.service
+    dest: /etc/systemd/system/kubelet.service
+  notify: restart kubelet
+  tags: kubelet
+
+- name: flush handlers
+  meta: flush_handlers
+  tags: kubelet
+
+- name: start kubelet
+  systemd: 
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: kubelet
+  tags: kubelet
+
+#test
+- name: Wait for kubelet port to become open
+  wait_for:
+    port: 10248
+    delay: 10
+    timeout: 300
+  tags: kubelet
+
+- name: get kubelet healthcheck endpoint
+  uri:
+    url: "http://{{ private_ip_address }}:10248/healthz"
+    return_content: yes
+    validate_certs: no
+  register: kubelet_healthcheck_result
+  tags: kubelet
+
+- name: test kubelet healthcheck response
+  fail:
+    msg: 'kubelet healthcheck failed'
+  when: "'ok' not in kubelet_healthcheck_result.content"
+  tags: kubelet
+
+# kube-proxy
+
+- name: create kube-proxy-config.yaml
+  template:
+    src: kube-proxy-config.j2.yaml
+    dest: "{{ kube_proxy_config_dir }}/kube-proxy-config.yaml"
+  notify: restart kube-proxy
+  tags: kube-proxy
+
+- name: create kube-proxy.service
+  template: 
+    src: kube-proxy.j2.service
+    dest: /etc/systemd/system/kube-proxy.service
+  notify: restart kube-proxy
+  tags: kube-proxy
+
+- name: flush handlers
+  meta: flush_handlers
+  tags: kube-proxy
+
+- name: start kube-proxy
+  systemd: 
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: kube-proxy
+  tags: kube-proxy
+
+
+#test
+- name: Wait for kube-proxy port to become open
+  wait_for:
+    port: 10249
+    delay: 10
+    timeout: 300
+  tags: kube-proxy
+
+- name: get kube-proxy healthcheck endpoint
+  uri:
+    url: "http://{{ private_ip_address }}:10249/healthz"
+    return_content: yes
+    validate_certs: no
+  register: kube_proxy_healthcheck_result
+  tags: kube-proxy
+
+- name: test kube-proxy healthcheck response
+  fail:
+    msg: 'kube-proxy healthcheck failed'
+  when: "'ok' not in kube_proxy_healthcheck_result.content"
+  tags: kube-proxy  
+  
+
 # kube-proxy-config.yaml
 # kube-proxy.service
+# configure CNI
+
+# - name: start kube-proxy
+#   systemd: 
+#     state: started
+#     daemon_reload: yes
+#     name: kube-proxy
+#     enabled: yes
+
+
+
 
