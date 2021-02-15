@@ -4,4 +4,4 @@ clientConnection:
   kubeconfig: "{{ kubernetes_configs_dir }}/{{ inventory_hostname }}.kubeconfig"
 mode: "iptables"
 clusterCIDR: "{{ cluster_cidr }}"
-healthzBindAddress: 0.0.0.0:10256
+

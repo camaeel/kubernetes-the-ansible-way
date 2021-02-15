@@ -261,7 +261,7 @@
 
 - name: get kube-proxy healthcheck endpoint
   uri:
-    url: "http://{{ private_ip_address }}:10249/healthz"
+    url: "http://127.0.0.1:10249/healthz"
     return_content: yes
     validate_certs: no
   register: kube_proxy_healthcheck_result
