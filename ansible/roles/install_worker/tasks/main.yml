@@ -273,7 +273,7 @@
   when: "'ok' not in kube_proxy_healthcheck_result.content"
   tags: kube-proxy  
   
-
+#TODO add automatic bootstraping of node workers: https://github.com/mmumshad/kubernetes-the-hard-way/blob/master/docs/10-tls-bootstrapping-kubernetes-workers.md
 
 
 # configure CNI
