@@ -88,6 +88,7 @@ resource "aws_instance" "controlplane" {
     {
       Name = "controlplane-${count.index}"
       ansible-group = "controlplane"
+      index = "${count.index}"
     },
   )
 }
@@ -108,6 +109,7 @@ resource "aws_instance" "worker" {
     {
       Name = "worker-${count.index}"
       ansible-group = "workers"
+      index = "${count.index}"
     },
   )
 }
