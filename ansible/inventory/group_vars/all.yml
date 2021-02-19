@@ -4,4 +4,4 @@ service_ip_range: 10.96.0.0/24
 service_nodeport_range: 30000-32767
 cluster_cidr: 10.10.0.0/16
 cluster_dns_address: '10.96.0.10'
-
+pod_cidr_net: 10.200.0.0/16

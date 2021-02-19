@@ -135,6 +135,18 @@
   tags: 
   - containerd
 
+# configure cni
+- name: template cni config
+  template: 
+    src: "{{ item }}"
+    dest: "/etc/cni/net.d/{{ item }}"
+  loop:
+    - 10-bridge.conf
+    - 99-loopback.conf
+  tags: 
+  - cni
+
+
 # Optionally we could create a temporary directory
 - name: create local tmp directory for checksums
   local_action:
@@ -210,7 +222,7 @@
 
 - name: get kubelet healthcheck endpoint
   uri:
-    url: "http://{{ private_ip_address }}:10248/healthz"
+    url: "http://127.0.0.1:10248/healthz"
     return_content: yes
     validate_certs: no
   register: kubelet_healthcheck_result
@@ -277,6 +289,28 @@
 
 
 # configure CNI
+
+- name: set weave url
+  local_action:
+    module: command
+    cmd: "kubectl --context={{ admin_context_name }} version"
+  register: kubectl_version
+  become: false
+  run_once: True  
+  tags:
+  - cni
+  - weave
+
+- name: install weave
+  local_action:
+    module: command
+    cmd: "kubectl --context={{ admin_context_name }} apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ kubectl_version.stdout | b64encode }}'"
+  become: false
+  run_once: True
+  tags:
+  - cni
+  - weave
+
 # - name: install calico - 1
 #   local_action:
 #     module: command
