@@ -170,9 +170,11 @@
   loop:
   - kubelet
   - kube-proxy
+  - kubectl
   tags: 
   - kubelet
   - kube-proxy
+  - kubectl
 
 - name: "download kubernetes binaries - version: {{ kubernetes_version }}"
   get_url: 
@@ -185,10 +187,12 @@
   loop:
   - kubelet
   - kube-proxy
+  - kubectl  
   tags: 
   - kubelet
   - kube-proxy
-
+  - kubectl
+  
 - name: create kubelet-config.yaml
   template:
     src: kubelet-config.j2.yaml
@@ -306,6 +310,14 @@
       sysctl_set: yes
       state: present
       reload: yes      
+
+  - name: set ip forward
+    sysctl:
+      name: 'net.bridge.bridge-nf-call-iptables'
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes    
 
   - name: set weave url
     local_action:

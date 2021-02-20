@@ -1,0 +1,8 @@
+- name: Create a Service object from an inline definition
+  become: False
+  run_once: True
+  local_action:
+    context: "{{ admin_context_name }}" 
+    module: k8s
+    state: present
+    src: roles/setup_kubelet_rbac/files/kubelet_rbac.yml

@@ -1,7 +1,7 @@
 kind: KubeProxyConfiguration
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 clientConnection:
-  kubeconfig: "{{ kubernetes_configs_dir }}/{{ inventory_hostname }}.kubeconfig"
+  kubeconfig: "{{ kubernetes_configs_dir }}/kube-proxy.kubeconfig"
 mode: "iptables"
 clusterCIDR: "{{ cluster_cidr }}"
 

@@ -138,4 +138,10 @@
     tags: 
     - install_worker
     
+  - role: setup_kubelet_rbac
+    tags:
+    - setup_kubelet_rbac
 
+  - role: setup_dns
+    tags: 
+    - setup_dns

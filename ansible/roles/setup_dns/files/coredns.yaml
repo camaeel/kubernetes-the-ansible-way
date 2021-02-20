@@ -51,11 +51,10 @@ data:
         health
         kubernetes cluster.local in-addr.arpa ip6.arpa {
           pods insecure
-          upstream
           fallthrough in-addr.arpa ip6.arpa
         }
         prometheus :9153
-        proxy . /etc/resolv.conf
+        forward . /etc/resolv.conf
         cache 30
         loop
         reload
@@ -92,7 +91,7 @@ spec:
           operator: "Exists"
       containers:
       - name: coredns
-        image: coredns/coredns:1.8.1
+        image: coredns/coredns:1.8.0
         imagePullPolicy: IfNotPresent
         resources:
           limits:
