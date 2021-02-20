@@ -145,6 +145,9 @@
     - 99-loopback.conf
   tags: 
   - cni
+  - calico
+  when: cni_plugin is defined and cni_plugin == 'calico'
+
 
 
 # Optionally we could create a temporary directory
@@ -289,46 +292,59 @@
 
 
 # configure CNI
-
-- name: set weave url
-  local_action:
-    module: command
-    cmd: "kubectl --context={{ admin_context_name }} version"
-  register: kubectl_version
-  become: false
-  run_once: True  
+- name: weave net cni
+  when: cni_plugin is defined and cni_plugin == 'weave'
   tags:
   - cni
   - weave
+  block:
+    
+  - name: set ip forward
+    sysctl:
+      name: net.ipv4.ip_forward
+      value: '1'
+      sysctl_set: yes
+      state: present
+      reload: yes      
 
-- name: install weave
-  local_action:
-    module: command
-    cmd: "kubectl --context={{ admin_context_name }} apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ kubectl_version.stdout | b64encode }}'"
-  become: false
-  run_once: True
-  tags:
-  - cni
-  - weave
+  - name: set weave url
+    local_action:
+      module: command
+      cmd: "kubectl --context={{ admin_context_name }} version"
+    register: kubectl_version
+    become: false
+    run_once: True  
 
-# - name: install calico - 1
-#   local_action:
-#     module: command
-#     cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml"
-#   become: false
-#   run_once: True
-#   tags:
-#   - cni
-#   - calico
+  - name: install weave
+    local_action:
+      module: command
+      cmd: "kubectl --context={{ admin_context_name }} apply -f 'https://cloud.weave.works/k8s/net?k8s-version={{ kubectl_version.stdout | b64encode }}'"
+    become: false
+    run_once: True
 
-# - name: install calico - 2
-#   local_action:
-#     module: command
-#     cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml"
-#   become: false
-#   run_once: True
-#   tags:
-#   - cni
-#   - calico
+
+- name: install calico - IN PROGRESS
+  when: cni_plugin is defined and cni_plugin == 'calico'
+  block:
+
+  - name: install calico - 1
+    local_action:
+      module: command
+      cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml"
+    become: false
+    run_once: True
+    tags:
+    - cni
+    - calico
+
+  - name: install calico - 2
+    local_action:
+      module: command
+      cmd: "kubectl --context={{ admin_context_name }} apply -f https://docs.projectcalico.org/manifests/custom-resources.yaml"
+    become: false
+    run_once: True
+    tags:
+    - cni
+    - calico
 
 

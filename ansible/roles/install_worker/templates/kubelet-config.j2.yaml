@@ -15,6 +15,6 @@ clusterDNS:
 #podCIDR: "${POD_CIDR}"
 resolvConf: "/run/systemd/resolve/resolv.conf"
 runtimeRequestTimeout: "15m"
-#tlsCertFile: "{{ pki_directory }}/{{ inventory_hostname }}.crt"
-#tlsPrivateKeyFile: "{{ pki_directory }}/{{ inventory_hostname }}.key"
+tlsCertFile: "{{ pki_directory }}/{{ inventory_hostname }}.crt"
+tlsPrivateKeyFile: "{{ pki_directory }}/{{ inventory_hostname }}.key"
 
