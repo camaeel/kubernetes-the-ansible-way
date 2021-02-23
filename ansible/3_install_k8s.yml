@@ -14,6 +14,7 @@
         kubeconfig_path: "{{ ansible_env.HOME }}/.kube/config"
         server: "{{ hostvars['loadbalancer'].public_ip_address }}"
         user: admin
+        context: "{{ admin_context_name }}"
         cred_filename: admin
         default: False
   - name: generate_kubeconfig
