@@ -311,13 +311,13 @@
       state: present
       reload: yes      
 
-  - name: set ip forward
-    sysctl:
-      name: 'net.bridge.bridge-nf-call-iptables'
-      value: '1'
-      sysctl_set: yes
-      state: present
-      reload: yes    
+  # - name: set sysctl bridge-nf-call-iptables
+  #   sysctl:
+  #     name: net.bridge.bridge-nf-call-iptables
+  #     value: '1'
+  #     sysctl_set: yes
+  #     state: present
+  #     reload: yes    
 
   - name: set weave url
     local_action:

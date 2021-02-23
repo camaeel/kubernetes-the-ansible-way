@@ -61,6 +61,22 @@ Run: `ansible-playbook -i inventory/inventory.aws_ec2.yml 2_prepare_lb.yml`
 
 Run: `ansible-playbook -i inventory/inventory.aws_ec2.yml 3_install_k8s.yml`
 
+# Smoke tests
+
+1. Test secret encryption
+    1. Create secret: `kubectl create secret generic kubernetes-the-hard-way --from-literal="mykey=mydata"`
+    1. Test if secret is encrypted (on controlplane node): `ETCDCTL_API=3 etcdctl get --endpoints=https://127.0.0.1:2379 --cacert=/etc/pki/k8s/ca.crt   --cert=/etc/pki/k8s/etcd-server.crt   --key=/etc/pki/k8s/etcd-server.key  /registry/secrets/default/kubernetes-the-hard-way  | grep 'k8s:enc:aescbc'` - should return 0
+1.  Test deployments:
+    1. Create deployment: `kubectl create deployment nginx --image=nginx`
+    1. `kubectl get pods -l app=nginx`
+
+1. Services:
+    1. Expose port: `kubectl expose deploy nginx --type=NodePort --port 80`
+    1. Get node port: `PORT_NUMBER=$(kubectl get svc -l app=nginx -o jsonpath="{.items[0].spec.ports[0].nodePort}")`
+    1. Test request (on each worker node): `curl http://worker-1:$PORT_NUMBER`
+1. Logs: `kubectl logs $(kubectl get pods -l app=nginx -o jsonpath="{.items[0].metadata.name}")`
+1. Exec: `kubectl exec -ti $(kubectl get pods -l app=nginx -o jsonpath="{.items[0].metadata.name}") -- nginx -v | grep -E "^nginx version: nginx/.*"` - should return 0
+
 # Cleanup
 The easiest way to cleanup the project is to use terraform to destroy de infrastructure. In `terraform` directory run `terraform destroy`
 
