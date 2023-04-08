@@ -1,3 +1,7 @@
+# Project archivised
+
+This project is no longer actively mainatained 
+
 # Intro
 Install kubernetes "the hard way" using ansible playbooks. 
 
